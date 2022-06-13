@@ -13,11 +13,13 @@ namespace MVC_ViewModels_Data.Controllers
     {
         IPeopleService _peopleService;
         ExDbContext _context;
+        IPeopleRepo _peopleRepo;
 
-        public PeopleController(IPeopleService peopleService, ExDbContext context)
+        public PeopleController(IPeopleService peopleService, ExDbContext context, IPeopleRepo peopleRepo)
         {
             _peopleService = peopleService;
             _context = context;
+            _peopleRepo = peopleRepo;
         }
 
         [HttpGet]
@@ -39,7 +41,13 @@ namespace MVC_ViewModels_Data.Controllers
             {
                 searchperson = searchperson.Where(s => s.Name!.Contains(FilterString));
             }
-            return View(_peopleService.All());
+            var peopleViewModel = new PeopleViewModel
+            {
+                CityList = _peopleRepo.GetCityList(),
+                PeopleListView =  searchperson.ToList()
+            };
+            List<Person> people = _context.Person.Include(i => i.City).ToList();
+            return View(peopleViewModel);
         }
 
 
